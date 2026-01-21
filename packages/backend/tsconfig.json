@@ -1,10 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "module": "Node16",
+    "moduleResolution": "Node16",   // ← 新增
+    "target": "ES2022",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "outDir": "dist",
     "rootDir": "src",
-    "module": "Node16",
-    "target": "ES2022",
     "types": ["node"]
   },
   "include": ["src/**/*"],
