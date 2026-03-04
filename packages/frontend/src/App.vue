@@ -1,9 +1,86 @@
 <template>
-  <h1>Hello Vue3 + Vite + TS</h1>
-  <el-button type="primary" @click="msg = 'clicked'">{{ msg }}</el-button>
+  <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+    <h1>📝 我的博客</h1>
+
+    <!-- 文章列表 -->
+    <h2>文章列表</h2>
+    <div v-if="posts.length === 0">暂无文章</div>
+    <div v-for="post in posts" :key="post._id" style="border:1px solid #ccc; margin-bottom:10px; padding:10px; border-radius:5px;">
+      <h3>{{ post.title }}</h3>
+      <p>{{ post.content }}</p>
+      <small>作者：{{ post.author }} | 发布时间：{{ new Date(post.createdAt).toLocaleString() }}</small>
+    </div>
+
+    <!-- 新增文章表单 -->
+    <h2>✍️ 写新文章</h2>
+    <form @submit.prevent="submitPost">
+      <div>
+        <label>标题：</label><br>
+        <input v-model="newPost.title" required style="width:100%; padding:8px; margin-bottom:10px;">
+      </div>
+      <div>
+        <label>内容：</label><br>
+        <textarea v-model="newPost.content" required rows="4" style="width:100%; padding:8px; margin-bottom:10px;"></textarea>
+      </div>
+      <div>
+        <label>作者：</label><br>
+        <input v-model="newPost.author" required style="width:100%; padding:8px; margin-bottom:10px;">
+      </div>
+      <button type="submit" style="padding:10px 20px; background:#42b983; color:white; border:none; border-radius:5px; cursor:pointer;">发布文章</button>
+    </form>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-const msg = ref('click me')
+import { ref, onMounted } from 'vue'
+import { getPosts, createPost } from './api/posts' // 引入我们封装的 API
+
+// 定义文章列表数据
+const posts = ref([])
+
+// 新增表单数据
+const newPost = ref({
+  title: '',
+  content: '',
+  author: 'admin'  // 默认作者，也可以留空让用户填
+})
+
+// 加载所有文章
+const fetchPosts = async () => {
+  try {
+    const res = await getPosts()
+    posts.value = res.data.data  // 根据后端返回结构调整，通常返回 { data: [...] }
+  } catch (err) {
+    console.error('获取文章失败', err)
+  }
+}
+
+// 提交新文章
+const submitPost = async () => {
+  try {
+    await createPost(newPost.value)
+    // 清空表单
+    newPost.value = { title: '', content: '', author: 'admin' }
+    // 刷新列表
+    await fetchPosts()
+  } catch (err) {
+    console.error('发布失败', err)
+  }
+}
+
+// 页面加载时获取文章
+onMounted(() => {
+  fetchPosts()
+})
 </script>
+
+<style scoped>
+/* 简单的样式，可自行调整 */
+input, textarea {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+button:hover {
+  background: #369f6e;
+}
+</style>
