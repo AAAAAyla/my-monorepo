@@ -33,42 +33,35 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getPosts, createPost } from './api/posts' // 引入我们封装的 API
+import { getPosts, createPost, type Post } from './api/posts'  // 引入类型
 
-// 定义文章列表数据
-const posts = ref([])
+const posts = ref<Post[]>([])  // 指定泛型
 
-// 新增表单数据
 const newPost = ref({
   title: '',
   content: '',
-  author: 'admin'  // 默认作者，也可以留空让用户填
+  author: 'admin'
 })
 
-// 加载所有文章
 const fetchPosts = async () => {
   try {
     const res = await getPosts()
-    posts.value = res.data.data  // 根据后端返回结构调整，通常返回 { data: [...] }
+    posts.value = res.data.data  // res.data 是 { data: Post[] }
   } catch (err) {
     console.error('获取文章失败', err)
   }
 }
 
-// 提交新文章
 const submitPost = async () => {
   try {
     await createPost(newPost.value)
-    // 清空表单
     newPost.value = { title: '', content: '', author: 'admin' }
-    // 刷新列表
     await fetchPosts()
   } catch (err) {
     console.error('发布失败', err)
   }
 }
 
-// 页面加载时获取文章
 onMounted(() => {
   fetchPosts()
 })
